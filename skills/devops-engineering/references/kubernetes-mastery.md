@@ -1,6 +1,6 @@
 # Kubernetes Architecture & Production Mastery Reference
 
-Synthesized from **Kubernetes Official Documentation & Concepts**.
+Synthesized from **Kubernetes Official Documentation, Concepts & Gateway API**.
 
 ---
 
@@ -26,6 +26,7 @@ A resilient Kubernetes pod must configure all three probes correctly:
 lifecycle:
   preStop:
     exec:
+      # Sleep gives kube-proxy time to remove pod from endpoints before SIGTERM
       command: ["/bin/sh", "-c", "sleep 5"]
 ```
 *Why sleep 5?* Kubernetes endpoint updates propagate asynchronously to `kube-proxy` across all nodes. Without a small sleep in `preStop`, incoming requests might still be routed to a pod that has already received `SIGTERM`.
@@ -80,4 +81,78 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+```
+
+---
+
+## 5. Kubernetes Gateway API Standard (`gateway.networking.k8s.io`)
+The Kubernetes Gateway API is the official next-generation standard succeeding legacy `Ingress`. It decouples infrastructure provisioning from application routing through a role-oriented architecture:
+
+```text
+               ┌─────────────────────────────────┐
+               │    GatewayClass (Infra Team)    │ (e.g. Envoy, Istio, Cilium)
+               └────────────────┬────────────────┘
+                                │
+               ┌────────────────▼────────────────┐
+               │     Gateway (Cluster Ops)       │ (IP, Ports, TLS termination)
+               └────────────────┬────────────────┘
+                                │
+         ┌──────────────────────┴──────────────────────┐
+         ▼                                             ▼
+┌─────────────────────────┐               ┌─────────────────────────┐
+│ HTTPRoute: API Service  │               │ HTTPRoute: ML Inference │ (App Devs)
+└───────────┬─────────────┘               └───────────┬─────────────┘
+            ▼                                         ▼
+┌─────────────────────────┐               ┌─────────────────────────┐
+│ Service: backend-api    │               │ Service: ml-serving     │
+└─────────────────────────┘               └─────────────────────────┘
+```
+
+### Production Gateway API Blueprint
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: platform-gateway
+  namespace: production
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: platform-wildcard-tls
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: api-routing
+  namespace: production
+spec:
+  parentRefs:
+    - name: platform-gateway
+  hostnames:
+    - "api.platform.internal"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1/predict
+      # Weighted Canary Shifting (90% stable, 10% canary)
+      backendRefs:
+        - name: api-inference-service
+          port: 8000
+          weight: 90
+        - name: api-inference-service-canary
+          port: 8000
+          weight: 10
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            add:
+              - name: X-Gateway-Routed
+                value: "true"
 ```

@@ -85,3 +85,58 @@ class Money:
             raise ValueError("Currency mismatch")
         return Money(self.amount + other.amount, self.currency)
 ```
+
+---
+
+## 5. Distributed Event Publishing & Transactional Outbox Pattern
+
+### The Dual-Write Problem
+In microservices architectures, an application often needs to modify a database and notify other services via a message broker (e.g., Kafka, RabbitMQ). 
+If the database write succeeds but the network call to the message broker fails (or the app crashes), the system enters an inconsistent state. Using distributed Two-Phase Commit (2PC / XA) is slow, fragile, and not supported by modern message brokers.
+
+### The Solution: Transactional Outbox
+Write both the domain mutation and an outbox event record inside the **same local ACID database transaction**:
+
+```python
+from uuid import UUID, uuid4
+import json
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.ext.asyncio import AsyncSession
+
+class OutboxEvent(Base):
+    __tablename__ = "outbox_events"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    aggregate_type: Mapped[str] = mapped_column(nullable=False)   # e.g., "Order"
+    aggregate_id: Mapped[str] = mapped_column(nullable=False)     # e.g., order_id
+    event_type: Mapped[str] = mapped_column(nullable=False)       # e.g., "OrderCreated"
+    payload: Mapped[dict] = mapped_column(nullable=False)         # Event data
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+async def create_order_with_outbox(
+    session: AsyncSession, order_data: OrderCreateDTO
+) -> Order:
+    # 1. Mutate business entity
+    order = Order(user_id=order_data.user_id, total=order_data.total)
+    session.add(order)
+    await session.flush() # Populate generated order.id
+
+    # 2. Append event to outbox within identical transaction boundary
+    event = OutboxEvent(
+        aggregate_type="Order",
+        aggregate_id=str(order.id),
+        event_type="OrderCreated",
+        payload={"order_id": str(order.id), "user_id": str(order.user_id), "total": order.total},
+    )
+    session.add(event)
+    
+    # 3. Unit of work commits both atomically
+    await session.commit()
+    return order
+```
+
+### Event Dispatch via Change Data Capture (CDC / Debezium)
+- **Debezium Engine**: Reads the PostgreSQL write-ahead log (WAL) directly using logical replication.
+- **Outbox Event Router SMT**: Debezium's `io.debezium.transforms.outbox.EventRouter` unwraps the row from `outbox_events` and routes it to the designated Kafka topic based on `aggregate_type`.
+- **Benefits**: Zero loss, guaranteed at-least-once delivery, zero double-write inconsistencies, and decoupled publisher logic.
+

@@ -86,7 +86,7 @@ outputs = llm.generate(prompts, sampling_params)
 
 ---
 
-## 3. Tokenizer Invariants & Padding Rules
+## 4. Tokenizer Invariants & Padding Rules
 - **Padding Side**:
   - Training: Right-padding is standard.
   - Causal Generation (Inference): **Must use Left-Padding**! If right-padded, the model attempts to generate tokens continuing from the padding tokens, causing degraded or corrupted output.
@@ -96,3 +96,20 @@ outputs = llm.generate(prompts, sampling_params)
       tokenizer.pad_token = tokenizer.eos_token
   tokenizer.padding_side = "left"
   ```
+
+---
+
+## 5. Low-Latency Serving: Speculative Decoding & Chunked Prefill
+
+### A. Speculative Decoding (Draft Models)
+Memory bandwidth is the primary bottleneck during LLM autoregressive token decoding. Speculative decoding couples a smaller, faster **draft model** (e.g., Llama-3-1B) with the **target model** (e.g., Llama-3-70B):
+1. The draft model generates $K$ candidate tokens speculatively in parallel.
+2. The target model evaluates all $K$ tokens in a single forward pass.
+3. Accepted tokens are emitted simultaneously, yielding $2\times - 3\times$ lower Inter-Token Latency (ITL) without altering the output distribution.
+
+### B. Chunked Prefill Architecture
+- **Problem**: When a long prompt arrives, standard schedulers run the full prefill eagerly, stalling ongoing token generation for all other concurrent requests and causing massive latency jitter.
+- **Solution (`--enable-chunked-prefill`)**:
+  - Slices incoming prompt sequences into smaller chunks (bounded by `--max-num-batched-tokens`, e.g., 512 or 2048 tokens).
+  - Interleaves prefill chunks with decoding steps, ensuring active requests maintain consistent Time-To-Next-Token (TTNT) even under heavy prompt traffic.
+
