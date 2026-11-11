@@ -22,9 +22,10 @@ case "$1" in
     --global)
         TARGET_DIR="${HOME}/.gemini/config"
         echo "Installing Expert Developer Profile globally to: ${TARGET_DIR}"
-        mkdir -p "${TARGET_DIR}/skills"
+        mkdir -p "${TARGET_DIR}/skills" "${TARGET_DIR}/templates"
         cp -v "${SCRIPT_DIR}/GEMINI.md" "${TARGET_DIR}/GEMINI.md"
         cp -rv "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
+        cp -rv "${SCRIPT_DIR}/templates/"* "${TARGET_DIR}/templates/"
         echo "✅ Global installation complete!"
         ;;
     --project)
@@ -35,9 +36,10 @@ case "$1" in
         PROJECT_DIR="$2"
         TARGET_DIR="${PROJECT_DIR}/.agents"
         echo "Installing Expert Developer Profile into project: ${PROJECT_DIR}"
-        mkdir -p "${TARGET_DIR}/skills"
+        mkdir -p "${TARGET_DIR}/skills" "${TARGET_DIR}/templates"
         cp -v "${SCRIPT_DIR}/AGENTS.md" "${TARGET_DIR}/AGENTS.md"
         cp -rv "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
+        cp -rv "${SCRIPT_DIR}/templates/"* "${TARGET_DIR}/templates/"
         echo "✅ Project installation complete!"
         ;;
     *)

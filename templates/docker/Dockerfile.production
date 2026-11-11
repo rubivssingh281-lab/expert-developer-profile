@@ -1,0 +1,77 @@
+# syntax=docker/dockerfile:1.7
+# ==============================================================================
+# Hardened Production Multi-Stage Dockerfile (FastAPI + PyTorch Ecosystem)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Stage 1: Dependency Builder & Compiler
+# ------------------------------------------------------------------------------
+FROM python:3.12-slim-bookworm AS builder
+
+WORKDIR /build
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install minimal OS build dependencies with cache mount
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+# Compile and install wheel dependencies into local user prefix using BuildKit pip cache
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --user --no-warn-script-location -r requirements.txt
+
+# ------------------------------------------------------------------------------
+# Stage 2: Distroless/Minimal Hardened Runtime
+# ------------------------------------------------------------------------------
+FROM python:3.12-slim-bookworm AS runtime
+
+WORKDIR /app
+
+ENV PATH=/home/nonroot/.local/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8000
+
+# Install tini for proper PID 1 signal forwarding and zombie reaper handling
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+    tini \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create unprivileged non-root user and group with deterministic ID
+RUN groupadd -g 10001 appgroup && \
+    useradd -u 10001 -g appgroup -s /sbin/nologin -M -d /home/nonroot nonroot && \
+    mkdir -p /home/nonroot /tmp/app && \
+    chown -R nonroot:appgroup /home/nonroot /app /tmp/app
+
+# Copy compiled wheel binaries from builder stage
+COPY --from=builder --chown=nonroot:appgroup /root/.local /home/nonroot/.local
+
+# Copy application source code
+COPY --chown=nonroot:appgroup . /app
+
+# Switch permanently to unprivileged non-root user
+USER nonroot:appgroup
+
+EXPOSE 8000
+
+# Standardized Kubernetes/Docker healthcheck
+HEALTHCHECK --interval=20s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8000/healthz || exit 1
+
+# Execute through tini for graceful SIGTERM process propagation
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--timeout-keep-alive", "5"]

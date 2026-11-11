@@ -30,6 +30,16 @@ expert-developer-profile/
 ├── install.sh                     # Automated 1-command installer script
 ├── GEMINI.md                      # Always-on Principal Architect Rules
 ├── AGENTS.md                      # Mirror rules file (for AGENTS.md standard)
+├── AntigravityMasterUpgradePrompt.md # Master architectural upgrade prompt
+├── templates/                     # Golden production-ready blueprints
+│   ├── fastapi-pytorch-service/
+│   │   └── main.py                # Async FastAPI + PyTorch + asyncpg + OAuth2 Scopes + BOLA protection
+│   ├── docker/
+│   │   └── Dockerfile.production  # BuildKit multi-stage cache-mounted rootless container
+│   ├── kubernetes/
+│   │   └── production-stack.yaml  # Deployment, 3-probe, HPA, PDB, NetworkPolicy
+│   └── checklists/
+│       └── PR_ARCHITECTURE_SECURITY_CHECKLIST.md # Pre-merge Staff Engineer audit checklist
 └── skills/                        # On-demand specialized skills & deep-dive manuals
     ├── devops-engineering/
     │   ├── SKILL.md
@@ -82,6 +92,15 @@ expert-developer-profile/
 * **[fowler-poeaa-complete-catalog.md](./skills/fastapi-backend-architecture/references/fowler-poeaa-complete-catalog.md)**: Martin Fowler's PoEAA catalog: Domain Model vs Transaction Script, Unit of Work (`AsyncSession`), Repository / Data Mapper separation, Service Layer, DTOs via Pydantic v2, and Optimistic (`version_id`) vs Pessimistic Offline Locking for long-running business transactions.
 * **[fastapi-advanced-patterns.md](./skills/fastapi-backend-architecture/references/fastapi-advanced-patterns.md)**: Custom `APIRoute` subclassing (`GzipRequest`, `GzipRoute`, `TimedLoggingRoute`), fine-grained authorization via `OAuth2PasswordBearer` and `SecurityScopes`, yield dependencies with Redis connection pools, Server-Sent Events (SSE), and RFC 7807 Problem Details.
 * **[postgresql-18-internals.md](./skills/fastapi-backend-architecture/references/postgresql-18-internals.md)**: PostgreSQL 18 Native Asynchronous I/O (`io_uring`), B-Tree **Skip Scan** index optimization, native `uuidv7()` timestamp-clustered primary keys, GIN `jsonb_path_ops`, BRIN indexing, MVCC mechanics, and logical replication failover (`failover = true` + `pg_createsubscriber`).
+
+---
+
+## 🏗️ Golden Production Blueprints (`templates/`)
+
+* **[fastapi-pytorch-service/main.py](./templates/fastapi-pytorch-service/main.py)**: Complete production microservice combining async FastAPI, PyTorch model serving, `asyncpg` pooled database sessions, OAuth2 JWT authentication with fine-grained `SecurityScopes`, BOLA/IDOR tenant boundary enforcement, non-blocking inference offloading via `asyncio.to_thread`, and RFC 9457 structured error handling.
+* **[docker/Dockerfile.production](./templates/docker/Dockerfile.production)**: BuildKit multi-stage `Dockerfile` with cached apt/pip mounts (`--mount=type=cache`), unprivileged non-root execution (`USER 10001:10001`), `tini` PID 1 signal forwarding for graceful `SIGTERM` draining, read-only filesystem compatibility, and healthcheck endpoints.
+* **[kubernetes/production-stack.yaml](./templates/kubernetes/production-stack.yaml)**: Complete Kubernetes production manifest suite featuring RollingUpdate Deployments with Guaranteed QoS matching, three-probe configuration (`startupProbe`, `livenessProbe`, `readinessProbe`), `preStop` sleep hooks, multi-AZ `topologySpreadConstraints`, `PodDisruptionBudget`, HPA (`autoscaling/v2`), and zero-trust default-deny + allowlist `NetworkPolicy` manifests.
+* **[checklists/PR_ARCHITECTURE_SECURITY_CHECKLIST.md](./templates/checklists/PR_ARCHITECTURE_SECURITY_CHECKLIST.md)**: Rigorous Staff Engineer pre-merge audit checklist covering async safety, N+1 query elimination, PostgreSQL 18 indexing, OWASP API security, container hardening, and ML serving reliability.
 
 ---
 
