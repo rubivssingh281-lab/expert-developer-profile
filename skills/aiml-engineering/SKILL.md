@@ -1,7 +1,36 @@
 ---
 name: aiml-engineering
 description: >-
-  Use this skill when building AI/ML applications, designing Retrieval-Augmented Generation (RAG) systems, training or fine-tuning models (PyTorch recipes, Hugging Face transformers, LoRA/PEFT), engineering classical ML pipelines (Scikit-Learn), deploying inference, or applying Google Machine Learning foundational principles.
+  Use this skill when building AI/ML applications, designing Retrieval-Augmented Generation (RAG) systems, training or fine-tuning models (PyTorch recipes, Hugging Face transformers, LoRA/PEFT, FSDP2), engineering classical ML pipelines (Scikit-Learn), deploying inference, or applying Google Machine Learning foundational principles.
+trigger_patterns:
+  keywords: ["pytorch", "torch", "huggingface", "transformers", "peft", "lora", "qlora", "vllm", "sklearn", "model serving", "rag", "embeddings", "inference", "fsdp", "fsdp2", "amp", "gradscaler", "pagedattention"]
+  file_globs: ["**/*model*.py", "**/*train*.py", "**/*infer*.py", "**/*rag*.py", "**/requirements*.txt", "**/pyproject.toml"]
+  architectural_intents: ["model-training", "fine-tuning", "rag-pipeline", "inference-serving", "classical-ml-pipeline", "vram-capacity-optimization"]
+theta_bindings:
+  governing_parameters: ["kappa", "delta"]
+  parameter_mappings:
+    kappa:
+      cpu-only: "Pure CPU inference, ONNX runtime, quantize to int8, avoid CUDA memory allocations"
+      gpu-8gb-vram: "Enforce 4-bit NormalFloat (nf4) QLoRA, double quant, gradient checkpointing, peak VRAM <= 7.2GB ceiling"
+      gpu-24gb-vram: "Single-GPU 16-bit inference or QLoRA batch size <= 16, FlashAttention-2, vLLM continuous batching"
+      single-a100-80gb: "Full bfloat16 fine-tuning, large context window (32k+), vLLM PagedAttention with high KV-cache budget"
+      multi-node-fsdp: "PyTorch FSDP2 per-parameter sharding using DTensor across multi-node cluster with epoch-aware DistributedSampler"
+cross_skill_hooks:
+  upstream:
+    - skill: "fastapi-backend-architecture"
+      contract: "Provides bounded asyncio.Queue and async request payload dispatch to dynamic micro-batch worker"
+    - skill: "cybersecurity-appsec"
+      contract: "Validates input sanitization, token bounds, and prompt injection defense before tensor encoding"
+  downstream:
+    - skill: "devops-engineering"
+      contract: "Configures GPU resource requests/limits, CUDA runtime container, and KEDA autoscaling on queue depth"
+lazy_references:
+  - file: "references/pytorch-recipes-deep-dive.md"
+    condition: "Activated when implementing PyTorch training, FSDP2, DDP, torch.compile, or low-latency inference loops"
+  - file: "references/huggingface-peft-reference.md"
+    condition: "Activated when designing LoRA/QLoRA fine-tuning, vLLM PagedAttention, KV-cache sizing, or RAG systems"
+  - file: "references/sklearn-google-ml-foundations.md"
+    condition: "Activated when building Scikit-Learn tabular pipelines, feature crosses, or evaluating data leakage"
 ---
 
 # AI/ML, Deep Learning & LLM Systems Engineering Skill
@@ -73,9 +102,9 @@ scores = cross_val_score(pipeline, X_train, y_train, cv=cv, scoring="roc_auc")
 
 ---
 
-## 3. PyTorch Canonical Recipes Standard
+## 3. PyTorch Canonical Recipes & Distributed Training (FSDP2)
 
-### High-Efficiency Training Loop with AMP (Automatic Mixed Precision)
+### A. High-Efficiency Training Loop with AMP (Automatic Mixed Precision)
 ```python
 import torch
 import torch.nn as nn
@@ -128,11 +157,18 @@ torch.save({
 }, "checkpoint.pt")
 ```
 
+### B. PyTorch FSDP2 Memory Calculation Formula
+When $\kappa = \text{multi-node-fsdp}$, calculate memory footprint per GPU rank ($M_{\text{FSDP2}}$):
+
+$$M_{\text{FSDP2}} = \frac{\Psi \cdot B_{\text{param}}}{N} + \frac{\Psi \cdot B_{\text{grad}}}{N} + \frac{\Psi \cdot B_{\text{opt}}}{N} + M_{\text{unsharded\_layer}} + M_{\text{activations}}$$
+
+Where $\Psi$ is total parameters, $N$ is rank count, $B_{\text{opt}} = 12$ bytes for AdamW (FP32 master weights + momentum + variance), and $M_{\text{unsharded\_layer}}$ is the peak transient memory of the currently executing transformer block brought in via `all-gather`.
+
 ---
 
 ## 4. Hugging Face Transformers & PEFT/LoRA Standards
 
-### Inference & Tokenizer Hygiene
+### A. Inference & Tokenizer Hygiene
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
@@ -140,7 +176,6 @@ import torch
 model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
 
 tokenizer = AutoTokenizer.from_pretrained(model_id)
-# Ensure padding token is set
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
@@ -151,7 +186,6 @@ model = AutoModelForCausalLM.from_pretrained(
     attn_implementation="flash_attention_2" if torch.cuda.is_available() else "eager",
 )
 
-# Explicit tokenization parameters
 inputs = tokenizer(
     "Synthesize the core invariants of distributed consensus:",
     return_tensors="pt",
@@ -173,9 +207,14 @@ with torch.inference_mode():  # Faster and lower memory than torch.no_grad()
 response = tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
 ```
 
-### Parameter-Efficient Fine-Tuning (PEFT / LoRA)
-- Apply LoRA to attention projection weights (`q_proj`, `k_proj`, `v_proj`, `o_proj`).
-- Set low rank `r=8` or `16`, `lora_alpha=16` or `32`, `lora_dropout=0.05` to adapt models with `< 1%` trainable parameters while preventing catastrophic forgetting.
+### B. vLLM PagedAttention KV-Cache Memory Formula
+During production inference serving, calculate KV-cache memory per token across all layers:
+
+$$\text{KV}_{\text{bytes/token}} = 2 \times L \times H_{\text{kv}} \times D_{\text{head}} \times B_{\text{dtype}}$$
+
+The maximum concurrent token capacity is bounded by:
+
+$$\text{Max Tokens} = \frac{(\text{VRAM}_{\text{total}} \times \text{gpu\_memory\_utilization}) - \text{VRAM}_{\text{weights}} - \text{VRAM}_{\text{overhead}}}{\text{KV}_{\text{bytes/token}}}$$
 
 ---
 
@@ -183,4 +222,4 @@ response = tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special
 - **Chunking**: Prefer semantic or recursive character splitting (500–1000 tokens) with 10–15% overlap.
 - **Hybrid Retrieval**: Combine dense semantic search (vector embeddings via cosine similarity) and sparse keyword retrieval (BM25) with Reciprocal Rank Fusion (RRF).
 - **Cross-Encoder Re-Ranking**: Rerank the top 25 candidates using a cross-encoder model to pass the 3–5 most relevant chunks to the generation prompt.
-- **Structured Validation**: Require LLM outputs to adhere to Pydantic schemas using structured outputs / Instructor to guarantee valid API consumption.
+- **Structured Validation**: Require LLM outputs to adhere to Pydantic schemas using structured outputs to guarantee valid API consumption.
