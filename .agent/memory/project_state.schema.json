@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentProjectStateSchema",
+  "description": "Strict JSON schema for persisting episodic state, settled ADRs, hardware bounds, and bug histories for autonomous agents.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "last_synced_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active_theta_vector": {
+      "type": "object",
+      "properties": {
+        "tau": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "sigma": {
+          "type": "string",
+          "enum": ["local-edge", "startup-1k-rps", "growth-10k-rps", "hyperscale-100k-rps"]
+        },
+        "rho": {
+          "type": "string",
+          "enum": ["prototype", "internal-prod", "zero-trust-public", "regulated-pci-hipaa"]
+        },
+        "kappa": {
+          "type": "string",
+          "enum": ["cpu-only", "gpu-8gb-vram", "gpu-24gb-vram", "single-a100-80gb", "multi-node-fsdp"]
+        },
+        "delta": {
+          "type": "string",
+          "enum": ["surgical-diff", "full-blueprint", "red-team-audit"]
+        }
+      },
+      "required": ["tau", "sigma", "rho", "kappa", "delta"],
+      "additionalProperties": false
+    },
+    "settled_stack": {
+      "type": "object",
+      "properties": {
+        "language_runtime": { "type": "string" },
+        "backend_framework": { "type": "string" },
+        "database_engine": { "type": "string" },
+        "connection_pooler": { "type": "string" },
+        "ml_framework": { "type": "string" },
+        "container_runtime": { "type": "string" },
+        "orchestrator": { "type": "string" }
+      },
+      "required": ["language_runtime", "backend_framework", "database_engine"],
+      "additionalProperties": false
+    },
+    "settled_architectural_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "adr_id": { "type": "string" },
+          "title": { "type": "string" },
+          "date_settled": { "type": "string", "format": "date-time" },
+          "winning_candidate": { "type": "string" },
+          "utility_score": { "type": "number" },
+          "file_ref": { "type": "string" }
+        },
+        "required": ["adr_id", "title", "date_settled", "winning_candidate", "utility_score"],
+        "additionalProperties": false
+      }
+    },
+    "resolved_bug_root_causes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "incident_id": { "type": "string" },
+          "description": { "type": "string" },
+          "root_cause": { "type": "string" },
+          "invariant_violated": { "type": "string" },
+          "remediation_commit_or_ref": { "type": "string" }
+        },
+        "required": ["incident_id", "description", "root_cause", "invariant_violated"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "project_name",
+    "last_synced_timestamp",
+    "active_theta_vector",
+    "settled_stack",
+    "settled_architectural_decisions",
+    "resolved_bug_root_causes"
+  ],
+  "additionalProperties": false
+}
