@@ -1,0 +1,21 @@
+# Active Agent Harness State (`STATE.md`)
+
+- **Schema Version**: `3.0.0`
+- **Active Parameter Vector (`θ`)**:
+  - `τ (thinking_depth)`: `3` (Architectural)
+  - `σ (scale_tier)`: `growth-10k-rps`
+  - `ρ (security_posture)`: `zero-trust-public`
+  - `κ (compute_envelope)`: `gpu-8gb-vram`
+  - `δ (delivery_mode)`: `full-blueprint`
+  - `μ (memory_mode)`: `episodic-ledger`
+  - `β (token_budget)`: `lean-5pct`
+- **Last Verification Receipt**:
+  - Command: `python3 scripts/validate_repo_integrity.py --check-math --check-sync && bash templates/hooks/verify_blueprint.sh`
+  - Status: `PASS (Exit Code 0)`
+- **Active Worktrees**: `main` (primary)
+- **Active Milestones**:
+  - `M1`: Core Brain Directives & Synchronized Rules (`AGENTS.md`, `GEMINI.md`, `CLAUDE.md`) - COMPLETED
+  - `M2`: Agentic Orchestration Skill & High-Demand References - IN_PROGRESS
+  - `M3`: Production MCP Server, CAPT Playbook & Verification Harness - IN_PROGRESS
+  - `M4`: Verification Scripts, Test Suite & Installer - IN_PROGRESS
+- **Open Blockers**: None

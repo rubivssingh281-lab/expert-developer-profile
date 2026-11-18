@@ -1,47 +1,70 @@
-# Staff Engineer Pull Request Architecture & Security Checklist
+# Staff Engineer Pull Request Architecture & Security Checklist (v2.0)
 
-A mandatory pre-merge gate for all production code, services, and infrastructure changes.
+A mandatory pre-merge gate for all production code, services, agent workflows, and infrastructure changes across the 5 core engineering domains.
+
+---
+
+## 0. Cognitive State & Parameterized Envelope Verification
+- [ ] **State Vector $\theta$ Explicitly Declared**: Does the implementation adhere to the instantiated $\theta = \langle \tau, \sigma, \rho, \kappa, \delta, \mu, \beta \rangle$?
+- [ ] **Quantitative Capacity Math Proof (`[CAPACITY_MATH]`)**:
+  - [ ] **Database Connection Pool**: Verified that $N_{\text{pods}} \times N_{\text{workers}} \times (\text{pool} + \text{overflow}) \le 0.80 \times C_{\text{PgBouncerMax}}$?
+  - [ ] **Compute Envelope (VRAM)**: If ML is involved, is total VRAM (weights + grads + optim + activations + KV-cache) bounded beneath $\kappa_{\text{limit}}$?
+  - [ ] **SRE Little's Law Concurrency**: Is concurrency capacity sized for $L = \lambda \cdot W_{\text{P99}}$ with bounded queue buffers?
+- [ ] **Weighted ADR Evaluation (`[WEIGHTED_ADR]`)**: When $\tau \ge 3$, are candidate choices scored against the weighted utility function $U(A_k)$?
 
 ---
 
 ## 1. Concurrency, Async Safety & Event Loop Hygiene
 - [ ] **Zero Blocking I/O**: Are all file, network, and database operations strictly asynchronous inside `async def` routes?
-- [ ] **Offloaded CPU & Legacy Calls**: Are heavy cryptographic hashing, image compression, or synchronous libraries wrapped in `await asyncio.to_thread()` or dispatched to worker queues?
-- [ ] **Race Condition Prevention**: Are concurrent resource mutations (wallet deductions, counter increments, stock changes) protected via `SELECT ... FOR UPDATE`, atomic SQL CAS updates, or distributed Redis locks?
-- [ ] **Timeout Enforcements**: Does every outgoing HTTP/gRPC request declare an explicit connect, read, and write timeout?
+- [ ] **Offloaded CPU & Heavy Computations**: Are cryptographic operations, image transformations, and ML forward passes offloaded to `asyncio.to_thread` or worker queues?
+- [ ] **Race Condition Prevention**: Are concurrent resource mutations protected via `SELECT ... FOR UPDATE`, atomic SQL CAS updates, or distributed Redis locks?
+- [ ] **Bounded Queues & Dynamic Batching**: Are inference requests queued with `maxsize` limits and short collection timeouts (10–15ms) to prevent high P99 tail latency?
 
 ---
 
 ## 2. Data Integrity, SQL Performance & PostgreSQL 18
-- [ ] **N+1 Elimination**: Are foreign key relations eagerly loaded using `selectinload` or `joinedload` rather than causing per-row lazy queries in loops?
-- [ ] **Transaction Boundaries**: Are multi-entity mutations encapsulated within a single Unit of Work / scoped `AsyncSession` transaction?
-- [ ] **Primary Key Design**: Do new stateful tables utilize `uuidv7()` to ensure sequential B-Tree index clustering and prevent index page bloat?
-- [ ] **Query Plan Verification**: Has `EXPLAIN (ANALYZE, BUFFERS)` been verified on query changes to confirm that sequential scans on large tables are eliminated?
-- [ ] **Connection Pooling**: Is database session acquisition bound to request lifespan dependencies, ensuring connections are committed/rolled back and returned immediately to the pool?
+- [ ] **N+1 Query Elimination**: Are foreign key relations eagerly loaded using `selectinload` or `joinedload`?
+- [ ] **Explicit Unit of Work Boundaries**: Are multi-entity mutations encapsulated within a single scoped `AsyncSession` transaction?
+- [ ] **Sequential Indexing**: Do stateful tables utilize `uuidv7()` or sequential IDs to preserve B-Tree clustering and avoid page fragmentation?
+- [ ] **Connection Lifecycle**: Are database sessions returned immediately to the pool via lifespan dependencies with `expire_on_commit=False`?
 
 ---
 
 ## 3. OWASP API Security & Threat Modeling
-- [ ] **BOLA / IDOR Verification**: Does every database read, update, and delete query include an explicit `tenant_id == current_user.tenant_id` or `user_id == current_user.id` predicate?
-- [ ] **Input Contract Strictness**: Are request payloads strictly typed with Pydantic v2 schemas using `model_config = ConfigDict(extra="forbid", strict=True)`?
-- [ ] **Authentication & Scopes**: Are sensitive endpoints protected by asymmetric JWT verification (`RS256`/`EdDSA`) with explicit scope requirements (`Security(get_current_user, scopes=[...])`)?
+- [ ] **BOLA / IDOR Verification**: Does every database query include an explicit `tenant_id == current_user.tenant_id` or `user_id == current_user.id` predicate?
+- [ ] **Defensive Schema Hygiene**: Are request payloads strictly typed with Pydantic v2 schemas using `model_config = ConfigDict(extra="forbid", strict=True)`?
+- [ ] **Asymmetric Authentication**: Are protected endpoints verified with asymmetric JWT (`RS256`/`EdDSA`) and explicit permission scopes?
 - [ ] **Password & Secret Security**: Are passwords hashed using Argon2id ($m \ge 64\text{MB}, t \ge 3, p \ge 4$)? Are API keys compared using `hmac.compare_digest`?
-- [ ] **SSRF Defense**: Are all user-supplied URLs pre-resolved and verified to block RFC 1918 private subnets and cloud metadata endpoints (`169.254.169.254`)?
-- [ ] **Error Sanitization**: Are error payloads compliant with RFC 9457 Problem Details without exposing internal stack traces, system paths, or raw database messages?
+- [ ] **SSRF Defense**: Are all outbound HTTP requests filtered to block RFC 1918 private subnets and cloud metadata endpoints (`169.254.169.254`)?
+- [ ] **RFC 9457 Error Masking**: Are error payloads sanitized into RFC 9457 Problem Details without leaking database errors, SQL queries, or internal stack traces?
 
 ---
 
 ## 4. Container Hardening & DevOps Reliability
 - [ ] **Non-Root Execution**: Does the `Dockerfile` enforce unprivileged non-root user execution (`USER 10001:10001`)?
-- [ ] **Minimal Runtime Surface**: Is the production image using multi-stage BuildKit builds with minimal distroless or slim bases, discarding compilers and dev-tools?
+- [ ] **Minimal Runtime Surface**: Is the production image using multi-stage BuildKit builds with minimal distroless or slim bases?
 - [ ] **Read-Only Root Filesystem**: Does the container run with `readOnlyRootFilesystem: true`, mounting only transient scratch paths as `tmpfs`?
-- [ ] **Probe Alignment**: Are `startupProbe`, `livenessProbe`, and `readinessProbe` configured with appropriate timeouts and period thresholds?
-- [ ] **PreStop Hook**: Does the pod lifecycle include a `preStop: exec: command: ["/bin/sh", "-c", "sleep 5"]` hook to prevent 502 Bad Gateways during Ingress endpoint draining?
+- [ ] **Kubernetes Three-Probe Pattern**: Are `startupProbe`, `livenessProbe`, and `readinessProbe` configured with appropriate thresholds?
+- [ ] **PreStop Hook**: Does the pod lifecycle include a `preStop` sleep hook to prevent 502 Bad Gateway errors during Ingress endpoint draining?
 
 ---
 
 ## 5. Machine Learning & Inference Safety
-- [ ] **Inference Mode**: Is model evaluation strictly wrapped in `torch.inference_mode()` rather than legacy `torch.no_grad()`?
-- [ ] **Device Placement & Warmup**: Is model weights loading executed during application `lifespan` startup with a dummy forward pass before opening network traffic?
-- [ ] **Bounded Memory & Batching**: Are inference requests bounded by max sequence length caps and dynamic batching wait limits to eliminate GPU Out-Of-Memory (OOM) crashes?
-- [ ] **Model Checkpoint Integrity**: Are models loaded strictly with `weights_only=True` or `safetensors` to prevent arbitrary code execution vulnerabilities during deserialization?
+- [ ] **Inference Mode**: Is model evaluation wrapped in `@torch.inference_mode()` rather than legacy `torch.no_grad()`?
+- [ ] **Device Placement & Warmup**: Is model weights loading executed during application `lifespan` startup with a pre-warm dummy forward pass?
+- [ ] **CUDA OOM Recovery**: Does the inference loop handle `torch.cuda.OutOfMemoryError` gracefully by clearing caches and shedding load?
+- [ ] **Model Checkpoint Integrity**: Are models loaded strictly with `weights_only=True` or `safetensors` to prevent arbitrary code execution vulnerabilities?
+
+---
+
+## 6. Agentic Orchestration & Prompt Guardrails
+- [ ] **MCP Contract Strictness**: Are Model Context Protocol tools defined using JSON Schema Draft 2020-12 with `additionalProperties: false`?
+- [ ] **Acyclic DAG Validation**: Has Kahn's algorithm or DFS 3-color cycle detection run prior to dispatching subagent execution graphs?
+- [ ] **Dual-LLM Quarantine**: Are untrusted external inputs processed by quarantined models without tools before being parsed by privileged controllers?
+- [ ] **Static Plan Locking**: Does the agent freeze its execution plan before executing tools to prevent indirect prompt injection hijacking?
+
+---
+
+## 7. Deterministic Verification Gate
+- [ ] **Automated Script Execution**: Has `templates/hooks/verify_blueprint.sh` executed cleanly with 0 failures?
+- [ ] **Zero Placeholders**: Verified zero instances of `TODO`, `FIXME`, or truncated code blocks in production files?

@@ -2,6 +2,38 @@
 name: devops-engineering
 description: >-
   Use this skill when designing, building, automating, or troubleshooting DevOps workflows, CI/CD pipelines (GitHub Actions, GitLab CI), Docker BuildKit containers, Kubernetes architecture, Helm charts, HashiCorp Terraform (IaC), Linux administration, and Google SRE observability practices.
+trigger_patterns:
+  keywords: ["docker", "buildkit", "kubernetes", "k8s", "helm", "terraform", "sre", "sli", "slo", "prometheus", "grafana", "opentelemetry", "ci/cd", "github actions", "littles law", "burn rate"]
+  file_globs: ["**/Dockerfile*", "**/docker-compose*.yaml", "**/*.tf", "**/*.hcl", "**/k8s/**", "**/*.yaml", "**/.github/workflows/**"]
+  architectural_intents: ["container-hardening", "k8s-workload-manifests", "iac-automation", "sre-alerting-design", "capacity-planning", "ci-cd-pipeline-hardening"]
+theta_bindings:
+  governing_parameters: ["sigma", "delta"]
+  parameter_mappings:
+    sigma:
+      local-edge: "Single docker-compose, local sqlite/pg, zero-k8s overhead, minimal resource requests"
+      startup-1k-rps: "Kubernetes 3-replica Deployment, ingress-nginx, HPA cpu 75%, basic Prometheus alerts"
+      growth-10k-rps: "Guaranteed QoS, multi-AZ topologySpreadConstraints, PodDisruptionBudget, KEDA autoscaling, multi-burn-rate alerts"
+      hyperscale-100k-rps: "Multi-cluster service mesh, Gateway API, LIFO queue load shedding, PgBouncer sidecars, distributed rate-limiting"
+cross_skill_hooks:
+  upstream:
+    - skill: "fastapi-backend-architecture"
+      contract: "Provides healthz/readyz probe endpoints, lifespan graceful drain, and Prometheus metrics"
+    - skill: "cybersecurity-appsec"
+      contract: "Defines non-root UID 10001, drop ALL capabilities, read-only root filesystems, and sealed secrets"
+  downstream:
+    - skill: "aiml-engineering"
+      contract: "Provisions GPU device plugins, tolerations, and resource limits for model inference pods"
+lazy_references:
+  - file: "references/docker-buildkit-production.md"
+    condition: "Activated when crafting Dockerfile builds, multi-stage pipelines, cache mounts, or distroless packaging"
+  - file: "references/kubernetes-mastery.md"
+    condition: "Activated when designing Deployments, StatefulSets, 3-probe patterns, NetworkPolicies, or PDBs"
+  - file: "references/google-sre-handbook.md"
+    condition: "Activated when calculating SLIs/SLOs, multi-window burn rate alerts, Little's Law concurrency, or load shedding"
+  - file: "references/terraform-enterprise.md"
+    condition: "Activated when authoring HCL modules, remote state locking, moved blocks, or lifecycle preconditions"
+  - file: "references/ebpf-cilium-tetragon-keda-gitops.md"
+    condition: "Activated when deploying Cilium eBPF L7 network policies, Tetragon kernel execution guards, or KEDA GPU autoscalers"
 ---
 
 # DevOps, Cloud Infrastructure & SRE Engineering Skill
@@ -153,18 +185,22 @@ spec:
 
 ---
 
-## 3. Google Site Reliability Engineering (SRE) Doctrine
+## 3. Google Site Reliability Engineering (SRE) Doctrine & Math
 
-### Core Principles
+### Core Principles & Mathematical Formulas
 1. **Service Level Indicators (SLIs)**: Quantifiable metrics representing service health (e.g., HTTP 5xx error rate, p99 latency < 200ms).
 2. **Service Level Objectives (SLOs)**: Target reliability agreed upon with stakeholders (e.g., 99.9% of requests succeed in a 30-day rolling window).
-3. **Error Budget**: The remaining headroom ($100\% - \text{SLO} = 0.1\%$). When the error budget is exhausted, freeze feature deployments and focus exclusively on stability.
-4. **Toil Elimination**: Any operational work that is manual, repetitive, automatable, tactical, and lacks enduring value must be capped at `< 50%` of an engineer's time; automate the remainder.
-5. **Cascading Failure Defense**:
-   - Implement exponential backoff with jitter on all network clients.
-   - Deploy circuit breakers (fail-fast instead of queuing timeouts).
-   - Implement load shedding when memory/CPU saturation exceeds safe thresholds.
-6. **Blameless Post-Mortems**: Incidents are learning opportunities caused by systemic flaws, not individual incompetence. Document timeline, root causes, detection gap, and actionable remediation items.
+3. **Error Budget**: The remaining headroom:
+   $$\text{Error Budget} = 1 - \text{SLO}_{\text{target}}$$
+4. **Little's Law Concurrency Calculation**:
+   $$L = \lambda \times W_{\text{P99}}$$
+   Where $L$ is concurrency in flight, $\lambda$ is arrival throughput (RPS), and $W_{\text{P99}}$ is P99 latency in seconds.
+5. **Multi-Window Multi-Burn-Rate Alerting (Google SRE Standard for 99.9% SLO)**:
+   - **Critical Page ($14.4\times$ burn)**: 1-hour long window AND 5-minute short window (consumes 2% budget in 1 hour).
+   - **Critical Page ($6\times$ burn)**: 6-hour long window AND 30-minute short window (consumes 5% budget in 6 hours).
+   - **Ticket ($1\times$ burn)**: 3-day long window AND 6-hour short window (consumes 10% budget in 3 days).
+6. **Toil Elimination**: Cap manual repetitive tasks at `< 50%` of an engineer's time; automate the remainder.
+7. **Cascading Failure Defense**: Deploy exponential backoff with full jitter, circuit breakers, and LIFO queue scheduling under overload.
 
 ---
 

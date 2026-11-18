@@ -2,6 +2,36 @@
 name: cybersecurity-appsec
 description: >-
   Use this skill when reviewing code for security vulnerabilities, conducting threat modeling, implementing authentication/authorization (OAuth2, OIDC, JWT, RBAC), mitigating OWASP Top 10 risks, hardening APIs, handling cryptographic operations, complying with NIST CSF 2.0, or defending against PortSwigger Web Security attack vectors.
+trigger_patterns:
+  keywords: ["security", "auth", "jwt", "oauth2", "oidc", "owasp", "bola", "idor", "ssrf", "argon2id", "mtls", "stride", "nist", "portswigger", "cors", "csrf", "cryptography", "zero-trust", "token"]
+  file_globs: ["**/*auth*.py", "**/*security*.py", "**/*crypto*.py", "**/certs/**", "**/*policy*.yaml"]
+  architectural_intents: ["authentication-design", "authorization-hardening", "threat-modeling", "vulnerability-remediation", "zero-trust-architecture", "red-team-audit"]
+theta_bindings:
+  governing_parameters: ["rho", "delta"]
+  parameter_mappings:
+    rho:
+      prototype: "Permissive mock auth, self-signed certs, internal sandbox only"
+      internal-prod: "Standard JWT auth, Argon2id password hashing, basic role-based access control (RBAC)"
+      zero-trust-public: "Asymmetric RS256/EdDSA, mTLS between services, strict BOLA predicates, RFC 1918/169.254 SSRF blockers"
+      regulated-pci-hipaa: "Zero-trust public plus envelope encryption (KMS DEK), immutable audit logging, field-level PII encryption"
+cross_skill_hooks:
+  upstream:
+    - skill: "agentic-orchestration"
+      contract: "Provides indirect prompt injection quarantine and tool execution privilege boundaries"
+  downstream:
+    - skill: "fastapi-backend-architecture"
+      contract: "Enforces SecurityScopes, RFC 9457 Problem Details error sanitization, and BOLA query filters"
+    - skill: "devops-engineering"
+      contract: "Enforces default-deny NetworkPolicies, non-root container UID, and sealed secrets in CI/CD"
+lazy_references:
+  - file: "references/nist-csf-2-implementation.md"
+    condition: "Activated when designing organizational governance, audit logging, backup recovery, or NIST CSF 2.0 compliance"
+  - file: "references/owasp-cheat-sheets-guide.md"
+    condition: "Activated when implementing JWT auth, password hashing (Argon2id), BOLA/IDOR defenses, or OWASP Top 10 mitigations"
+  - file: "references/portswigger-attack-playbook.md"
+    condition: "Activated when auditing HTTP request smuggling, race conditions, CORS, SSRF metadata bypasses, or Web LLM attacks"
+  - file: "references/agentic-llm-supply-chain-slsa3.md"
+    condition: "Activated when defending against Dual-LLM indirect prompt injection, confused deputy attacks, SLSA Level 3, or Cosign signing"
 ---
 
 # Cybersecurity & Application Security (AppSec) Skill

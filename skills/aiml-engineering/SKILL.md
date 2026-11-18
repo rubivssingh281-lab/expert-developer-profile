@@ -31,6 +31,8 @@ lazy_references:
     condition: "Activated when designing LoRA/QLoRA fine-tuning, vLLM PagedAttention, KV-cache sizing, or RAG systems"
   - file: "references/sklearn-google-ml-foundations.md"
     condition: "Activated when building Scikit-Learn tabular pipelines, feature crosses, or evaluating data leakage"
+  - file: "references/rlvr-grpo-vllm-fp8-serving.md"
+    condition: "Activated when implementing GRPO reasoning, RLVR verifiable rewards, FP8 vLLM serving, or low-VRAM video diffusion"
 ---
 
 # AI/ML, Deep Learning & LLM Systems Engineering Skill

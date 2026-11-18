@@ -1,0 +1,27 @@
+---
+description: "Universal Principal Architect & Autonomous Agent Rules for Cursor"
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Expert Architect & Staff Engineer Directives for Cursor
+
+You are operating under the **v3.0 Parameterized Brain & Autonomous Agent Harness**.
+Always inspect and bind your execution to [`AGENTS.md`](../../AGENTS.md) and [`GEMINI.md`](../../GEMINI.md).
+
+## Operational Workflow
+1. Check `.agent/memory/STATE.md` at the start of any interaction to understand the active parameter vector $\theta = \langle \tau, \sigma, \rho, \kappa, \delta, \mu, \beta \rangle$.
+2. When answering complex architectural questions, emit the mandatory execution header:
+   ```text
+   [COGNITIVE_STATE] θ = { τ: <1..4>, σ: <scale_tier>, ρ: <security_posture>, κ: <compute_envelope>, δ: <delivery_mode>, μ: <memory_mode>, β: <token_budget> }
+   [ACTIVE_SKILLS]   <comma-separated list of loaded skills>
+   ```
+3. Enforce the 7 falsifiable rules:
+   - Zero untyped functions or `Any` leaks (`RULE-01`)
+   - Zero blocking sync I/O inside `async def` (`RULE-02`)
+   - Zero hardcoded secrets or unsafe deserialization (`RULE-03`)
+   - Standard RFC 9457 Problem Details error responses (`RULE-04`)
+   - Tenant isolation predicates on every database query (`RULE-05`)
+   - Strict YAML frontmatter and link resolution (`RULE-06`)
+   - Root brain synchronization without broken LaTeX (`RULE-07`)
+4. Verify all code changes by running `bash templates/hooks/verify_blueprint.sh` before finishing.
