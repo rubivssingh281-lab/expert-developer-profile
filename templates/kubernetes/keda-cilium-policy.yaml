@@ -1,0 +1,99 @@
+---
+# ==============================================================================
+# Cilium L7 NetworkPolicy, Tetragon TracingPolicy & KEDA GPU Autoscaler Bundle
+# ==============================================================================
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: fastapi-pytorch-service-policy
+  namespace: production
+spec:
+  endpointSelector:
+    matchLabels:
+      app: fastapi-pytorch-service
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: ingress-gateway
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+                path: "/health/live"
+              - method: "GET"
+                path: "/health/ready"
+              - method: "POST"
+                path: "/v1/inference"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: redis
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: "huggingface.co"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: block-container-shell-execution
+  namespace: production
+spec:
+  kprobes:
+    - call: "sys_execve"
+      syscall: true
+      args:
+        - index: 0
+          type: "string"
+      selectors:
+        - matchArgs:
+            - index: 0
+              operator: "In"
+              values:
+                - "/bin/sh"
+                - "/bin/bash"
+                - "/usr/bin/curl"
+                - "/usr/bin/wget"
+                - "/usr/bin/nc"
+          matchActions:
+            - action: Sigkill
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: vllm-gpu-scaledobject
+  namespace: production
+spec:
+  scaleTargetRef:
+    name: fastapi-pytorch-service
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  cooldownPeriod: 300
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 300
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-k8s.monitoring.svc:9090
+        metricName: vllm_num_requests_waiting
+        query: sum(vllm:num_requests_waiting{namespace="production"})
+        threshold: "5"

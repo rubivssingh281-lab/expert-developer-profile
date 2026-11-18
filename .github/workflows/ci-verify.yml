@@ -1,0 +1,37 @@
+name: "v3.0 Architectural & Code Quality Verification"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  verify:
+    name: "Deterministic Verification Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Codebase"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python 3.12"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: "Install Quality & Testing Dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy bandit pytest pytest-asyncio httpx fastapi pydantic pydantic-settings jinja2
+
+      - name: "Execute Repository Brain Integrity & LaTeX Linter"
+        run: |
+          python3 scripts/validate_repo_integrity.py --check-math --check-sync
+
+      - name: "Execute Deterministic Blueprint Verification"
+        run: |
+          bash templates/hooks/verify_blueprint.sh
+
+      - name: "Run Unit & Integration Test Suites"
+        run: |
+          pytest tests/ -v
