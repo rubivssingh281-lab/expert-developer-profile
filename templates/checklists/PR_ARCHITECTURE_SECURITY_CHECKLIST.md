@@ -1,4 +1,4 @@
-# Staff Engineer Pull Request Architecture & Security Checklist (v2.0)
+﻿# Staff Engineer Pull Request Architecture & Security Checklist (v2.0)
 
 A mandatory pre-merge gate for all production code, services, agent workflows, and infrastructure changes across the 5 core engineering domains.
 
@@ -7,10 +7,10 @@ A mandatory pre-merge gate for all production code, services, agent workflows, a
 ## 0. Cognitive State & Parameterized Envelope Verification
 - [ ] **State Vector $\theta$ Explicitly Declared**: Does the implementation adhere to the instantiated $\theta = \langle \tau, \sigma, \rho, \kappa, \delta, \mu, \beta \rangle$?
 - [ ] **Quantitative Capacity Math Proof (`[CAPACITY_MATH]`)**:
-  - [ ] **Database Connection Pool**: Verified that $N_{\text{pods}} \times N_{\text{workers}} \times (\text{pool} + \text{overflow}) \le 0.80 \times C_{\text{PgBouncerMax}}$?
-  - [ ] **Compute Envelope (VRAM)**: If ML is involved, is total VRAM (weights + grads + optim + activations + KV-cache) bounded beneath $\kappa_{\text{limit}}$?
-  - [ ] **SRE Little's Law Concurrency**: Is concurrency capacity sized for $L = \lambda \cdot W_{\text{P99}}$ with bounded queue buffers?
-- [ ] **Weighted ADR Evaluation (`[WEIGHTED_ADR]`)**: When $\tau \ge 3$, are candidate choices scored against the weighted utility function $U(A_k)$?
+  - [ ] **Database Connection Pool**: Verified that `N_pods × N_workers × (pool + overflow) ≤ 0.80 × C_PgBouncerMax`?
+  - [ ] **Compute Envelope (VRAM)**: If ML is involved, is total VRAM (weights + grads + optim + activations + KV-cache) bounded beneath `kappa_limit`?
+  - [ ] **SRE Little's Law Concurrency**: Is concurrency capacity sized for `L = λ · W_P99` with bounded queue buffers?
+- [ ] **Weighted ADR Evaluation (`[WEIGHTED_ADR]`)**: When $\tau \ge 3$, are candidate choices scored against the weighted utility function `U(A_k)`?
 
 ---
 

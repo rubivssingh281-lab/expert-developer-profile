@@ -1,4 +1,4 @@
----
+﻿---
 name: devops-engineering
 description: >-
   Use this skill when designing, building, automating, or troubleshooting DevOps workflows, CI/CD pipelines (GitHub Actions, GitLab CI), Docker BuildKit containers, Kubernetes architecture, Helm charts, HashiCorp Terraform (IaC), Linux administration, and Google SRE observability practices.
@@ -194,7 +194,7 @@ spec:
    $$\text{Error Budget} = 1 - \text{SLO}_{\text{target}}$$
 4. **Little's Law Concurrency Calculation**:
    $$L = \lambda \times W_{\text{P99}}$$
-   Where $L$ is concurrency in flight, $\lambda$ is arrival throughput (RPS), and $W_{\text{P99}}$ is P99 latency in seconds.
+   Where $L$ is concurrency in flight, $\lambda$ is arrival throughput (RPS), and `W_P99` is P99 latency in seconds.
 5. **Multi-Window Multi-Burn-Rate Alerting (Google SRE Standard for 99.9% SLO)**:
    - **Critical Page ($14.4\times$ burn)**: 1-hour long window AND 5-minute short window (consumes 2% budget in 1 hour).
    - **Critical Page ($6\times$ burn)**: 6-hour long window AND 30-minute short window (consumes 5% budget in 6 hours).

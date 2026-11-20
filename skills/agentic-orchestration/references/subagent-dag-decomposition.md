@@ -1,4 +1,4 @@
-# Subagent DAG Decomposition & Multi-Agent Execution Topologies
+﻿# Subagent DAG Decomposition & Multi-Agent Execution Topologies
 
 Authoritative engineering manual for designing, validating, and executing deterministic multi-agent Directed Acyclic Graphs (DAGs) in production AI agent systems.
 
@@ -7,9 +7,9 @@ Authoritative engineering manual for designing, validating, and executing determ
 ## 1. Formal Mathematical Model of an Agent DAG
 
 A multi-agent workflow is formalized as a Directed Acyclic Graph $G = (V, E)$:
-- **Vertices ($V = \{v_1, v_2, \dots, v_n\}$)**: Distinct agent execution tasks with specified subagent persona, input schema, tool access permissions, and output contract.
+- **Vertices** (`V = {v_1, v_2, ..., v_n}`): Distinct agent execution tasks with specified subagent persona, input schema, tool access permissions, and output contract.
 - **Edges ($E \subseteq V \times V$)**: Directed data and precedence constraints. A directed edge $(u, v) \in E$ denotes that agent $v$ depends on the output of agent $u$ and cannot begin execution until $u$ completes successfully.
-- **Acyclicity Invariant**: For all paths $p = (v_1, v_2, \dots, v_k)$, $v_1 \neq v_k$. The graph contains strictly zero cycles.
+- **Acyclicity Invariant**: For all paths `p = (v_1, v_2, ..., v_k)`, `v_1 != v_k`. The graph contains strictly zero cycles.
 
 ---
 

@@ -67,16 +67,16 @@ Every complex request is evaluated through this six-stage pipeline:
 ---
 
 ### 5. Weighted Multi-Objective ADR Scoring Function
-Replace qualitative pros/cons lists with an explicit **Weighted Utility Function** whenever $\tau \ge 3$. For candidate architectures $A_1, A_2, \dots, A_k$, compute:
+Replace qualitative pros/cons lists with an explicit **Weighted Utility Function** whenever $\tau \ge 3$. For candidate architectures `A_1, A_2, ..., A_k`, compute:
 
 ```math
 U(A_k) = w_L(\sigma) \cdot S_{\text{Latency}}(A_k) + w_C(\sigma, \rho) \cdot S_{\text{Consistency}}(A_k) + w_S(\rho) \cdot S_{\text{Security}}(A_k) + w_O(\sigma, \kappa) \cdot S_{\text{OpsSimplicity}}(A_k)
 ```
 
-Where weights $w_i \in [0, 1]$ sum to $1.0$ and shift dynamically based on $\theta$:
-- **Local/Edge Profile ($\sigma = \text{local-edge}$):** $w_O = 0.45, w_L = 0.25, w_S = 0.15, w_C = 0.15$ (prevents over-engineering on local scripts).
-- **Zero-Trust Public Production ($\sigma = \text{growth-10k-rps}, \rho = \text{zero-trust-public}$):** $w_S = 0.40, w_L = 0.25, w_C = 0.20, w_O = 0.15$ (prioritizes OWASP/PortSwigger hardening and P99 latency).
-- **VRAM-Constrained ML ($\kappa = \text{gpu-8gb-vram}$):** Adds a hard barrier constraint $\text{VRAM}_{\text{peak}}(A_k) \le 7.2\text{ GB}$ (any candidate exceeding ceiling receives $U(A_k) = -\infty$).
+Where weights `w_i` in `[0, 1]` sum to 1.0 and shift dynamically based on $\theta$:
+- **Local/Edge Profile ($\sigma = \text{local-edge}$):** `w_O = 0.45, w_L = 0.25, w_S = 0.15, w_C = 0.15` (prevents over-engineering on local scripts).
+- **Zero-Trust Public Production ($\sigma = \text{growth-10k-rps}, \rho = \text{zero-trust-public}$):** `w_S = 0.40, w_L = 0.25, w_C = 0.20, w_O = 0.15` (prioritizes OWASP/PortSwigger hardening and P99 latency).
+- **VRAM-Constrained ML ($\kappa = \text{gpu-8gb-vram}$):** Adds a hard barrier constraint `VRAM_peak(A_k) <= 7.2 GB` (any candidate exceeding ceiling receives `U(A_k) = -∞`).
 
 ---
 
@@ -105,7 +105,7 @@ Verify GPU memory footprint against hardware envelope $\kappa$ per [PyTorch Memo
 \text{VRAM}_{\text{KV}} = 2 \times B_{\text{batch}} \times S_{\text{context}} \times L_{\text{layers}} \times N_{\text{kv\_heads}} \times d_{\text{head}} \times B_{\text{dtype}}
 ```
 
-- **Automatic Hardware Fallback Rule**: If $\text{VRAM}_{\text{train}} > 0.90 \times \kappa_{\text{VRAM}}$, automatically enable 4-bit NormalFloat (`nf4`) QLoRA double quantization, gradient checkpointing (`use_reentrant=False`), paged 8-bit AdamW (`paged_adamw_8bit`), or CPU offloading without waiting for user prompting.
+- **Automatic Hardware Fallback Rule**: If `VRAM_train > 0.90 * kappa_VRAM`, automatically enable 4-bit NormalFloat (`nf4`) QLoRA double quantization, gradient checkpointing (`use_reentrant=False`), paged 8-bit AdamW (`paged_adamw_8bit`), or CPU offloading without waiting for user prompting.
 
 ---
 

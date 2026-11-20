@@ -1,4 +1,4 @@
-# Architectural Decision Record (ADR) Ledger Template
+﻿# Architectural Decision Record (ADR) Ledger Template
 
 - **ADR ID**: `ADR-YYYYMMDD-NNN`
 - **Title**: `[Short descriptive title of the architectural choice]`
@@ -41,13 +41,13 @@ U(A_k) = w_L \cdot S_{\text{Latency}}(A_k) + w_C \cdot S_{\text{Consistency}}(A_
 ```
 
 Weights dynamically configured based on $\theta$:
-- $w_S = 0.40, w_L = 0.25, w_C = 0.20, w_O = 0.15$ (Zero-Trust Public profile)
+- `w_S = 0.40, w_L = 0.25, w_C = 0.20, w_O = 0.15` (Zero-Trust Public profile)
 
-| Candidate Architecture | Latency ($S_L$) | Consistency ($S_C$) | Security ($S_S$) | Ops Simplicity ($S_O$) | Total Weighted Utility $U(A_k)$ | Decision |
+| Candidate Architecture | Latency (`S_L`) | Consistency (`S_C`) | Security (`S_S`) | Ops Simplicity (`S_O`) | Total Weighted Utility `U(A_k)` | Decision |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Candidate $A_1$: [Option 1]** | | | | | | Rejected |
-| **Candidate $A_2$: [Option 2]** | | | | | | **ACCEPTED (Winner)** |
-| **Candidate $A_3$: [Option 3]** | | | | | | Rejected |
+| **Candidate `A_1`: [Option 1]** | | | | | | Rejected |
+| **Candidate `A_2`: [Option 2]** | | | | | | **ACCEPTED (Winner)** |
+| **Candidate `A_3`: [Option 3]** | | | | | | Rejected |
 
 ---
 

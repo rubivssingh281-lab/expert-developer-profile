@@ -1,4 +1,4 @@
-# Antigravity v3.0 Unabridged Master Upgrade Prompt: Autonomous Agent Harness, MCP/A2A Protocols, CAPT Playbooks, 10-Phase Pipeline & 2026 Production Engineering Stack
+﻿# Antigravity v3.0 Unabridged Master Upgrade Prompt: Autonomous Agent Harness, MCP/A2A Protocols, CAPT Playbooks, 10-Phase Pipeline & 2026 Production Engineering Stack
 
 Copy the entire prompt below and paste it directly into **Google Antigravity** (or your autonomous coding agent CLI) at the root of [`rubivssingh281-lab/expert-developer-profile`](https://github.com/rubivssingh281-lab/expert-developer-profile).
 
@@ -142,7 +142,7 @@ Verify GPU memory footprint against hardware envelope $\kappa$ per [PyTorch Memo
 \text{VRAM}_{\text{KV}} = 2 \times B_{\text{batch}} \times S_{\text{context}} \times L_{\text{layers}} \times N_{\text{kv\_heads}} \times d_{\text{head}} \times B_{\text{dtype}}
 ```
 
-- **Automatic Hardware Fallback Rule**: If $\text{VRAM}_{\text{train}} > 0.90 \times \kappa_{\text{VRAM}}$, automatically enable 4-bit NormalFloat (`nf4`) QLoRA double quantization, gradient checkpointing (`use_reentrant=False`), paged 8-bit AdamW (`paged_adamw_8bit`), or CPU offloading without waiting for user prompting.
+- **Automatic Hardware Fallback Rule**: If `VRAM_train > 0.90 * kappa_VRAM`, automatically enable 4-bit NormalFloat (`nf4`) QLoRA double quantization, gradient checkpointing (`use_reentrant=False`), paged 8-bit AdamW (`paged_adamw_8bit`), or CPU offloading without waiting for user prompting.
 ````
 
 ### 1.2 Expand the Execution Parameter Vector $\theta$ to a 7-Tuple Control Plane

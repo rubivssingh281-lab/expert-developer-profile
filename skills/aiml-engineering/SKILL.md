@@ -1,4 +1,4 @@
----
+﻿---
 name: aiml-engineering
 description: >-
   Use this skill when building AI/ML applications, designing Retrieval-Augmented Generation (RAG) systems, training or fine-tuning models (PyTorch recipes, Hugging Face transformers, LoRA/PEFT, FSDP2), engineering classical ML pipelines (Scikit-Learn), deploying inference, or applying Google Machine Learning foundational principles.
@@ -160,11 +160,11 @@ torch.save({
 ```
 
 ### B. PyTorch FSDP2 Memory Calculation Formula
-When $\kappa = \text{multi-node-fsdp}$, calculate memory footprint per GPU rank ($M_{\text{FSDP2}}$):
+When $\kappa = \text{multi-node-fsdp}$, calculate memory footprint per GPU rank (`M_FSDP2`):
 
 $$M_{\text{FSDP2}} = \frac{\Psi \cdot B_{\text{param}}}{N} + \frac{\Psi \cdot B_{\text{grad}}}{N} + \frac{\Psi \cdot B_{\text{opt}}}{N} + M_{\text{unsharded\_layer}} + M_{\text{activations}}$$
 
-Where $\Psi$ is total parameters, $N$ is rank count, $B_{\text{opt}} = 12$ bytes for AdamW (FP32 master weights + momentum + variance), and $M_{\text{unsharded\_layer}}$ is the peak transient memory of the currently executing transformer block brought in via `all-gather`.
+Where $\Psi$ is total parameters, $N$ is rank count, `B_opt = 12` bytes for AdamW (FP32 master weights + momentum + variance), and `M_unsharded_layer` is the peak transient memory of the currently executing transformer block brought in via `all-gather`.
 
 ---
 

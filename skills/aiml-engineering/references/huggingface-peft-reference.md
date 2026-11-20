@@ -1,4 +1,4 @@
-# Hugging Face Transformers & PEFT/LoRA Production Reference
+﻿# Hugging Face Transformers & PEFT/LoRA Production Reference
 
 Synthesized from **Hugging Face Official Documentation, PEFT Standards & vLLM Serving**.
 
@@ -7,7 +7,7 @@ Synthesized from **Hugging Face Official Documentation, PEFT Standards & vLLM Se
 ## 1. Parameter-Efficient Fine-Tuning (LoRA & QLoRA)
 
 ### Mathematical Foundation of LoRA (Low-Rank Adaptation)
-Rather than updating all $W_0 \in \mathbb{R}^{d \times k}$ parameters during fine-tuning, LoRA freezes $W_0$ and decomposes the weight update $\Delta W$ into two low-rank matrices:
+Rather than updating all `W_0 ∈ R^(d×k)` parameters during fine-tuning, LoRA freezes `W_0` and decomposes the weight update $\Delta W$ into two low-rank matrices:
 $$W = W_0 + \Delta W = W_0 + \frac{\alpha}{r} (B \cdot A)$$
 Where $A \in \mathbb{R}^{r \times k}$, $B \in \mathbb{R}^{d \times r}$, with rank $r \ll \min(d, k)$.
 - Trainable parameters are reduced by $\ge 99\%$.
