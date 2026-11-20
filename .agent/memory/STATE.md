@@ -15,7 +15,7 @@
 - **Active Worktrees**: `main` (primary)
 - **Active Milestones**:
   - `M1`: Core Brain Directives & Synchronized Rules (`AGENTS.md`, `GEMINI.md`, `CLAUDE.md`) - COMPLETED
-  - `M2`: Agentic Orchestration Skill & High-Demand References - IN_PROGRESS
-  - `M3`: Production MCP Server, CAPT Playbook & Verification Harness - IN_PROGRESS
-  - `M4`: Verification Scripts, Test Suite & Installer - IN_PROGRESS
+  - `M2`: Agentic Orchestration Skill & High-Demand References - COMPLETED
+  - `M3`: Production MCP Server, CAPT Playbook & Verification Harness - COMPLETED
+  - `M4`: Verification Scripts, Test Suite & Installer - COMPLETED
 - **Open Blockers**: None

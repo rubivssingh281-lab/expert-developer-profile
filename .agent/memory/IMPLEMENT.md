@@ -36,3 +36,11 @@
 - `tests/test_mcp_server.py`: MCP endpoints & A2A discovery tests.
 - `install.sh`: Upgraded multi-profile & multi-harness installer.
 - `README.md`: Exhaustive v3.0 documentation.
+
+### Integration 3: 2026 Production Best-Practice Upgrades
+- `skills/agentic-orchestration/references/mcp-a2a-protocol-architecture.md`: Streamable HTTP over SSE, dynamic tool discovery, code-execution schema offload, and OpenTelemetry trace propagation.
+- `skills/aiml-engineering/references/rlvr-grpo-vllm-fp8-serving.md`: Disaggregated vs colocated VRAM partitioning, PagedAttention `block_size=32` for 8k+ CoT, `expandable_segments:True`, and zero-copy DTensor weight streaming.
+- `skills/cybersecurity-appsec/references/agentic-llm-supply-chain-slsa3.md`: OWASP LLM01:2025 Dual-LLM functional isolation, XML `<untrusted_payload>` structural delimiters, server-side tool allowlists, and canary tripwires.
+- `skills/fastapi-backend-architecture/references/hybrid-pgvector-outbox-idempotency.md`: Native PostgreSQL 18 `uuidv7()`, in-database `hybrid_search` SQL function with Reciprocal Rank Fusion ($k=60$), and async outbox dispatcher with `FOR UPDATE SKIP LOCKED`.
+- `skills/devops-engineering/references/ebpf-cilium-tetragon-keda-gitops.md`: KEDA vLLM Prometheus queue-driven ScaledObject (scale-to-zero) and Tetragon in-kernel synchronous syscall interception (`sys_execve` Sigkill).
+
