@@ -113,3 +113,59 @@ spec:
 | **P1 Page** | 1 Hour | 14.4x | 2.0% | Critical | Automated Rollback + On-Call Page |
 | **P1 Page** | 6 Hours | 6.0x | 5.0% | High | On-Call Page |
 | **P2 Ticket** | 3 Days | 1.0x | 10.0% | Medium | SRE Incident Ticket |
+
+---
+
+## 4. Production KEDA GPU Event Scaler & Tetragon Process Lockout
+
+### 4.1 KEDA vLLM Queue-Driven ScaledObject (Scale-to-Zero)
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: vllm-gpu-scaler
+  namespace: ai-workloads
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vllm-server
+  minReplicaCount: 0  # Eliminates idle GPU spend
+  maxReplicaCount: 8
+  cooldownPeriod: 300
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-k8s.monitoring.svc:9090
+        metricName: vllm_num_requests_waiting
+        query: sum(vllm:num_requests_waiting{namespace="ai-workloads"})
+        threshold: "4"
+```
+
+### 4.2 Tetragon Kernel-Level Syscall Block (`sys_execve`)
+```yaml
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: block-unauthorized-container-exec
+  namespace: ai-workloads
+spec:
+  kprobes:
+    - call: "sys_execve"
+      syscall: true
+      args:
+        - index: 0
+          type: "string"
+      return: false
+      selectors:
+        - matchArgs:
+            - index: 0
+              operator: "Prefix"
+              values:
+                - "/bin/sh"
+                - "/bin/bash"
+                - "/usr/bin/curl"
+          matchActions:
+            - action: Sigkill
+```
+

@@ -126,3 +126,17 @@ class MCPtoA2ABridge:
         result: dict[str, Any] = resp.json()
         return result
 ```
+
+---
+
+## 4. Production Multi-Agent MCP Operations (2026 Best Practices)
+
+### 4.1 Streamable HTTP & L7 Scaling
+- Replace local `stdio` with **Streamable HTTP** over SSE (`/mcp` and `/mcp/events`) for microservice-based MCP servers deployed behind Kubernetes L7 ingresses.
+- Decouple agent state using external distributed caches (Redis / PostgreSQL) to allow seamless failover during multi-agent handoffs.
+
+### 4.2 Dynamic Tool Discovery & Code Execution Overload Mitigation
+- To prevent context window saturation when agents access dozens of MCP servers, avoid inlining massive static JSON Schemas.
+- Implement tool search endpoints (`tools/search`) and dynamic Python/code execution execution wrappers where the agent discovers schemas on-demand.
+- Propagate OpenTelemetry trace contexts (`traceparent` header) across all horizontal A2A and vertical MCP requests.
+

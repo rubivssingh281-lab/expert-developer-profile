@@ -97,3 +97,71 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
 
         return await call_next(request)
 ```
+
+---
+
+## 3. PostgreSQL 18 Native Hybrid Search Function & Async Outbox Worker
+
+### 3.1 In-Database RRF Function
+```sql
+CREATE OR REPLACE FUNCTION hybrid_search(
+    query_text TEXT,
+    query_embedding vector(384),
+    match_count INT DEFAULT 10,
+    rrf_k INT DEFAULT 60
+)
+RETURNS TABLE (
+    id UUID,
+    title TEXT,
+    content TEXT,
+    combined_score FLOAT
+) AS $$
+BEGIN
+    RETURN QUERY
+    WITH vector_search AS (
+        SELECT d.id, ROW_NUMBER() OVER (ORDER BY d.embedding <=> query_embedding) AS rank
+        FROM documents d
+        ORDER BY d.embedding <=> query_embedding
+        LIMIT match_count * 2
+    ),
+    fulltext_search AS (
+        SELECT d.id, ROW_NUMBER() OVER (ORDER BY ts_rank_cd(d.search_vector, websearch_to_tsquery('english', query_text)) DESC) AS rank
+        FROM documents d
+        WHERE d.search_vector @@ websearch_to_tsquery('english', query_text)
+        LIMIT match_count * 2
+    )
+    SELECT
+        COALESCE(v.id, f.id) AS id,
+        doc.title,
+        doc.content,
+        (COALESCE(1.0 / (rrf_k + v.rank), 0.0) + COALESCE(1.0 / (rrf_k + f.rank), 0.0))::FLOAT AS combined_score
+    FROM vector_search v
+    FULL OUTER JOIN fulltext_search f ON v.id = f.id
+    JOIN documents doc ON doc.id = COALESCE(v.id, f.id)
+    ORDER BY combined_score DESC
+    LIMIT match_count;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+### 3.2 Asynchronous Outbox Worker Loop
+```python
+async def outbox_dispatcher_loop(session_factory: async_sessionmaker[AsyncSession]) -> None:
+    """Polls and dispatches outbox events using PostgreSQL 18 SKIP LOCKED."""
+    while True:
+        async with session_factory() as session:
+            async with session.begin():
+                stmt = (
+                    select(OutboxEvent)
+                    .where(OutboxEvent.processed_at.is_(None))
+                    .order_by(OutboxEvent.created_at.asc())
+                    .limit(50)
+                    .with_for_update(skip_locked=True)
+                )
+                events = (await session.scalars(stmt)).all()
+                for event in events:
+                    # Publish event payload to broker (Kafka / RabbitMQ)
+                    event.processed_at = datetime.now(timezone.utc)
+        await asyncio.sleep(1.0)
+```
+

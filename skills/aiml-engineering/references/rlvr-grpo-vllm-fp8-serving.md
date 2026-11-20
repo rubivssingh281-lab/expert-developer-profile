@@ -59,3 +59,18 @@ For video diffusion (DiT), super-resolution, and local inference within an 8 GB 
 - **VAE Slicing & Tiling**: Processes image latents in spatial tiles to avoid OOM during decoding.
 - **Sequential CPU Offload**: `pipeline.enable_sequential_cpu_offload()` streams layers from host RAM to GPU VRAM layer by layer.
 - **Gradient Checkpointing**: `model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})`.
+
+---
+
+## 4. Production RLVR Rollout & FSDP2 Co-existence (2026 Best Practices)
+
+### 4.1 Disaggregated vs. Colocated VRAM Layouts
+- **Disaggregated Architecture**: Isolate vLLM rollout workers on separate GPU nodes from PyTorch FSDP2 training workers to completely prevent memory contention between PagedAttention KV-caches and AdamW optimizer states.
+- **Colocated Partitioning**: When sharing GPUs on single nodes, configure `vllm_gpu_memory_utilization=0.35`, reserving 65% of VRAM for FSDP2 model weights, gradients, optimizer states, and forward activations.
+- **Expandable Memory Segments**: Set `export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` to eliminate dynamic allocation fragmentation between the PyTorch caching allocator and vLLM's memory manager.
+
+### 4.2 PagedAttention Block Sizing & KV Precision
+- For extended reasoning sequences (4k–8k+ tokens), set `block_size=32` in vLLM to minimize block table metadata overhead during high-concurrency rollout sampling.
+- Configure `--kv-cache-dtype fp8_e5m2` or `fp8_e4m3` to double rollout batch throughput with negligible generation loss.
+- **Zero-Copy Weight Transfer**: Stream DTensor state dict updates directly from FSDP2 rank 0 to vLLM's `load_weights()` memory without intermediary disk serialization.
+

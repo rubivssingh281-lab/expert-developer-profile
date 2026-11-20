@@ -60,3 +60,17 @@ def validate_outbound_url(url: str) -> str:
   cosign sign --yes "${IMAGE_DIGEST}"
   cosign attest --yes --predicate sbom.cyclonedx.json --type cyclonedx "${IMAGE_DIGEST}"
   ```
+
+---
+
+## 4. OWASP LLM01:2025 Deep Defense & Dual-LLM Guardrail Protocol
+
+### 4.1 Quarantined vs. Privileged Functional Isolation
+- **Quarantined Reader**: Consumes raw untrusted inputs (PDFs, scraped web HTML, emails, external tool outputs). Possesses zero tools, zero database connections, and zero shell execution privileges. Produces strictly typed, inert JSON data models.
+- **Privileged Planner**: Operates business logic and dispatches tools. Never processes raw, unsanitized external strings directly.
+- **Structural Boundaries**: Wrap untrusted text blocks in explicit XML tags (`<untrusted_payload>...</untrusted_payload>`) with parser directives enforcing data-only treatment.
+
+### 4.2 Tool Allowlisting, ABAC & Canary Tripwires
+- **Server-Side Allowlisting**: Backend tool registries must strictly validate incoming tool execution calls against user session RBAC/ABAC tokens—never trust the agent's self-reported permissions.
+- **Canary Tokens**: Embed unique canary strings inside system prompts; automated egress tripwires trigger immediate alerts and session severance if a canary token appears in outbound payloads.
+
