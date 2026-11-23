@@ -9,6 +9,11 @@
   - `δ (delivery_mode)`: `full-blueprint`
   - `μ (memory_mode)`: `episodic-ledger`
   - `β (token_budget)`: `lean-5pct`
+  - `π (pedagogy)`: `student-mentor` (CSE Student Mentorship & Socratic Mode)
+- **Learner Profile & Teaching Contract**:
+  - `user_role`: Computer Science & Engineering (CSE) Student
+  - `mode`: `student-mentor`
+  - `mandate`: Explain all automation and code developments with concise snippets, connect concepts intuitively with real-world analogies (e.g. relating AI/ML, OS, networks), and periodically pose Socratic problem-solving questions during brainstorming.
 - **Last Verification Receipt**:
   - Command: `python3 scripts/validate_repo_integrity.py --check-math --check-sync && bash templates/hooks/verify_blueprint.sh`
   - Status: `PASS (Exit Code 0)`

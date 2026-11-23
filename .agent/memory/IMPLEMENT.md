@@ -44,3 +44,8 @@
 - `skills/fastapi-backend-architecture/references/hybrid-pgvector-outbox-idempotency.md`: Native PostgreSQL 18 `uuidv7()`, in-database `hybrid_search` SQL function with Reciprocal Rank Fusion ($k=60$), and async outbox dispatcher with `FOR UPDATE SKIP LOCKED`.
 - `skills/devops-engineering/references/ebpf-cilium-tetragon-keda-gitops.md`: KEDA vLLM Prometheus queue-driven ScaledObject (scale-to-zero) and Tetragon in-kernel synchronous syscall interception (`sys_execve` Sigkill).
 
+### Integration 4: CSE Student Mentorship & Socratic Parameter (`π = student-mentor`)
+- `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`: Expanded parameter vector to 8-tuple with $\pi$ (Pedagogy), added `@mentor` macro, and added Section 12 Socratic Mentorship Protocol.
+- `.agent/memory/STATE.md`: Bound `π=student-mentor` with learner profile mandate for concise illustrative code, intuitive real-world analogies, and periodic problem-solving checkpoints.
+
+
