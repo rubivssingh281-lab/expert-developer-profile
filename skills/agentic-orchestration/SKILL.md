@@ -32,6 +32,8 @@ lazy_references:
     condition: "Activated when managing token budgets, rolling summaries, sliding window buffers, or episodic state checkpoints"
   - file: "references/adversarial-prompt-guardrails.md"
     condition: "Activated when defending against indirect prompt injection, securing tool output pipelines, or enforcing Dual-LLM privilege isolation"
+  - file: "references/spec-driven-and-trajectory-evals.md"
+    condition: "Activated when building Spec-Driven agent harnesses, preventing phantom velocity, or scoring DAG tool-call trajectories"
 ---
 
 # Agentic AI & Multi-Agent Orchestration Skill
@@ -41,6 +43,7 @@ Authoritative knowledge base, canonical architectures, and production guidelines
 - **Multi-Agent Directed Acyclic Graph (DAG) Topologies** — [Subagent DAG Decomposition Reference](./references/subagent-dag-decomposition.md)
 - **Autonomous Agent Memory & Token Economics** — [Context Compaction & Episodic Memory Reference](./references/context-compaction-memory.md)
 - **Agentic AI Security & Guardrails** — [Adversarial Prompt Guardrails Reference](./references/adversarial-prompt-guardrails.md)
+- **Spec-Driven Harnesses & Trajectory Evals** — [Spec-Driven & Trajectory Evals Reference](./references/spec-driven-and-trajectory-evals.md)
 
 ---
 

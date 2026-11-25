@@ -1,4 +1,4 @@
-﻿---
+---
 name: aiml-engineering
 description: >-
   Use this skill when building AI/ML applications, designing Retrieval-Augmented Generation (RAG) systems, training or fine-tuning models (PyTorch recipes, Hugging Face transformers, LoRA/PEFT, FSDP2), engineering classical ML pipelines (Scikit-Learn), deploying inference, or applying Google Machine Learning foundational principles.
@@ -33,6 +33,8 @@ lazy_references:
     condition: "Activated when building Scikit-Learn tabular pipelines, feature crosses, or evaluating data leakage"
   - file: "references/rlvr-grpo-vllm-fp8-serving.md"
     condition: "Activated when implementing GRPO reasoning, RLVR verifiable rewards, FP8 vLLM serving, or low-VRAM video diffusion"
+  - file: "references/llm-eval-driven-development.md"
+    condition: "Activated when designing Eval-Driven Development (EDD), DeepEval pytest gates, calibrated LLM-as-a-Judge, or GraphRAG evaluations"
 ---
 
 # AI/ML, Deep Learning & LLM Systems Engineering Skill
@@ -41,6 +43,8 @@ Authoritative knowledge base, canonical code patterns, and production guidelines
 - **PyTorch Official Recipes Index** — [PyTorch Recipes & High-Performance Deep Learning Reference](./references/pytorch-recipes-deep-dive.md)
 - **Hugging Face Transformers & PEFT** — [Hugging Face Transformers & PEFT/LoRA Production Reference](./references/huggingface-peft-reference.md)
 - **Scikit-Learn & Google ML Foundations** — [Scikit-Learn & Google Machine Learning Foundations Reference](./references/sklearn-google-ml-foundations.md)
+- **RLVR, GRPO & FP8 Serving** — [RLVR, GRPO & vLLM FP8 Reference](./references/rlvr-grpo-vllm-fp8-serving.md)
+- **Eval-Driven Development & Judge Calibration** — [LLM Eval-Driven Development Reference](./references/llm-eval-driven-development.md)
 
 ---
 

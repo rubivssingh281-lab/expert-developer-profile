@@ -1,4 +1,4 @@
-﻿---
+---
 name: devops-engineering
 description: >-
   Use this skill when designing, building, automating, or troubleshooting DevOps workflows, CI/CD pipelines (GitHub Actions, GitLab CI), Docker BuildKit containers, Kubernetes architecture, Helm charts, HashiCorp Terraform (IaC), Linux administration, and Google SRE observability practices.
@@ -34,6 +34,8 @@ lazy_references:
     condition: "Activated when authoring HCL modules, remote state locking, moved blocks, or lifecycle preconditions"
   - file: "references/ebpf-cilium-tetragon-keda-gitops.md"
     condition: "Activated when deploying Cilium eBPF L7 network policies, Tetragon kernel execution guards, or KEDA GPU autoscalers"
+  - file: "references/idp-gateway-api-dora.md"
+    condition: "Activated when designing Internal Developer Platforms (IDPs), Kubernetes Gateway API routes, or DORA/Trunk-Based CI pipelines"
 ---
 
 # DevOps, Cloud Infrastructure & SRE Engineering Skill
@@ -43,6 +45,8 @@ Authoritative knowledge base and operational runbooks synthesizing standards fro
 - **Docker Official Building Best Practices & BuildKit** — [Docker BuildKit Production Reference](./references/docker-buildkit-production.md)
 - **Google Site Reliability Engineering (SRE) Book** — [Google SRE Handbook & Math](./references/google-sre-handbook.md)
 - **HashiCorp Terraform Documentation & Architecture** — [Terraform Enterprise Architecture Reference](./references/terraform-enterprise.md)
+- **eBPF Cilium, Tetragon & KEDA GPU Scaling** — [eBPF, Tetragon & KEDA Reference](./references/ebpf-cilium-tetragon-keda-gitops.md)
+- **Platform Engineering, Gateway API & DORA** — [IDP, Gateway API & DORA Reference](./references/idp-gateway-api-dora.md)
 
 ---
 
