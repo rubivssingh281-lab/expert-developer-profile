@@ -23,8 +23,10 @@ EXPECTED_SKILLS = [
     "agentic-orchestration",
     "aiml-engineering",
     "cybersecurity-appsec",
+    "data-engineering-observability",
     "devops-engineering",
     "fastapi-backend-architecture",
+    "frontend-fullstack-engineering",
 ]
 
 def check_skills_completeness() -> List[str]:

@@ -48,4 +48,12 @@
 - `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`: Expanded parameter vector to 8-tuple with $\pi$ (Pedagogy), added `@mentor` macro, and added Section 12 Socratic Mentorship Protocol.
 - `.agent/memory/STATE.md`: Bound `π=student-mentor` with learner profile mandate for concise illustrative code, intuitive real-world analogies, and periodic problem-solving checkpoints.
 
+### Integration 5: 2026 Industry Techniques & 7-Skill Expansion (`M6`)
+- `skills/frontend-fullstack-engineering/`: Added React 19 Compiler, Next.js App Router/RSC, validated Server Actions (`useActionState`), Drizzle/Zod type safety, Playwright E2E, and Core Web Vitals.
+- `skills/data-engineering-observability/`: Added Apache Iceberg, Polars lazy Arrow pipelines, DuckDB embedded SQL, Temporal durable execution, and unified OpenTelemetry + GenAI telemetry.
+- `skills/aiml-engineering/references/llm-eval-driven-development.md`: Added EDD, Stratified Golden Datasets, DeepEval pytest gates, calibrated LLM-as-a-Judge, and GraphRAG evaluation.
+- `skills/devops-engineering/references/idp-gateway-api-dora.md`: Added Internal Developer Platforms (human + agent paved roads), Kubernetes Gateway API `HTTPRoute`, Trunk-Based Development, and DORA metrics.
+- `skills/agentic-orchestration/references/spec-driven-and-trajectory-evals.md`: Added Spec-Driven Development, Engineering Agent Harnesses, and DAG trajectory scoring.
+- `scripts/validate_repo_integrity.py`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `install.sh`, `README.md`: Updated to validate and orchestrate all 7 skills.
+
 

@@ -68,13 +68,19 @@ expert-developer-profile/
 │   │   └── references/            # NIST CSF 2.0, OWASP Top 10, PortSwigger, SLSA Level 3
 │   ├── aiml-engineering/
 │   │   ├── SKILL.md
-│   │   └── references/            # PyTorch FSDP2, PEFT/LoRA, Scikit-Learn, GRPO/FP8 vLLM
+│   │   └── references/            # PyTorch FSDP2, PEFT/LoRA, Scikit-Learn, GRPO/FP8 vLLM, EDD/DeepEval
+│   ├── data-engineering-observability/ # 7th Core Skill: Lean Lakehouse, Temporal & OTel
+│   │   ├── SKILL.md
+│   │   └── references/            # Apache Iceberg, Polars, DuckDB, Temporal durable execution, OTel
 │   ├── fastapi-backend-architecture/
 │   │   ├── SKILL.md
 │   │   └── references/            # Fowler PoEAA, FastAPI advanced, PostgreSQL 18, pgvector RRF
+│   ├── frontend-fullstack-engineering/ # 6th Core Skill: Modern Full-Stack Web & Playwright
+│   │   ├── SKILL.md
+│   │   └── references/            # React 19 Compiler, Next.js App Router/RSC, Server Actions, Playwright
 │   └── agentic-orchestration/     # 5th Core Skill: Multi-agent execution & MCP contracts
 │       ├── SKILL.md
-│       └── references/            # MCP/A2A, CAPT playbooks, Context compaction & worktrees
+│       └── references/            # MCP/A2A, CAPT playbooks, Spec-Driven Harnesses & Trajectory Evals
 ├── templates/                     # Golden production blueprints & verification hooks
 │   ├── checklists/
 │   │   └── PR_ARCHITECTURE_SECURITY_CHECKLIST.md

@@ -23,4 +23,6 @@
   - `M2`: Agentic Orchestration Skill & High-Demand References - COMPLETED
   - `M3`: Production MCP Server, CAPT Playbook & Verification Harness - COMPLETED
   - `M4`: Verification Scripts, Test Suite & Installer - COMPLETED
+  - `M5`: CSE Student Mentorship Engine (`π=student-mentor`) - COMPLETED
+  - `M6`: 2026 Industry Expansion (7 Core Skills: Full-Stack Web, Data/OTel, EDD/DeepEval, IDPs/Gateway API, Spec-Driven Harnesses) - COMPLETED
 - **Open Blockers**: None

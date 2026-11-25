@@ -124,8 +124,8 @@ if [[ "${HARNESS}" == "all" || "${HARNESS}" == "copilot" ]]; then
     cp -v "${SCRIPT_DIR}/.github/copilot-instructions.md" "${TARGET_DIR}/.github/"
 fi
 
-# 2. Copy 5 domain skills
-echo "📚 Synchronizing 5 Core Domain Skills..."
+# 2. Copy 7 domain skills
+echo "📚 Synchronizing 7 Core Domain Skills..."
 mkdir -p "${TARGET_DIR}/skills"
 cp -rv "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
 
